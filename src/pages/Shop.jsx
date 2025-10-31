@@ -1,43 +1,15 @@
-import React, { useState } from "react";
-import Navbar from "../components/Navbar";
+// src/pages/Shop.jsx
+import React from "react";
 import ProductGrid from "../components/ProductGrid";
-import Cart from "../components/Cart";
 
 export default function Shop() {
-  const [cartItems, setCartItems] = useState([]);
-  const [cartOpen, setCartOpen] = useState(false);
-
-  const addToCart = (product) => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
-      if (existing) {
-        return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, { ...product, quantity: 1 }];
-    });
-  };
-
-  const removeFromCart = (id) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const total = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
-
   return (
-    <>
-      <Navbar setCartOpen={setCartOpen} cartCount={cartItems.length} />
-      <ProductGrid onAddToCart={addToCart} />
-      <Cart
-        isOpen={cartOpen}
-        onClose={() => setCartOpen(false)}
-        cartItems={cartItems}
-        removeFromCart={removeFromCart}
-        total={total}
-      />
-    </>
+    // Push content below the fixed navbar (adjust if your navbar is taller)
+    <main className="pt-28 lg:pt-32 bg-[#F9FAFB]">
+      {/* Keep your layout spacing consistent with Home */}
+      <section className="lg:px-32">
+        <ProductGrid />
+      </section>
+    </main>
   );
 }
