@@ -49,11 +49,12 @@ export default function Home() {
   </Container>
 
   {/* Trusted Seller Badge */}
-  <img
-    src={trustedBadge}
-    alt="Trusted Seller"
-    className="absolute left-1/2 -translate-x-3/4 -top-10 w-60 z-20 drop-shadow-lg"
-  />
+<img
+  src={trustedBadge}
+  alt="Trusted Seller"
+  className="hidden lg:block absolute left-1/2 -translate-x-3/4 -top-10 w-60 z-20 drop-shadow-lg"
+/>
+
 </section>
 
 

@@ -12,6 +12,7 @@ export default function Navbar() {
       {/* ===== Navbar ===== */}
       <header className="bg-white shadow-sm fixed top-0 left-0 w-full z-50">
         <div className="section-container flex items-center justify-between py-4">
+          
           {/* Left: Logo */}
           <Link to="/" className="flex items-center">
             <img
@@ -21,52 +22,48 @@ export default function Navbar() {
             />
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-10 text-[15px] font-medium">
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                isActive
-                  ? "text-black font-semibold"
-                  : "text-[rgba(0,0,0,0.5)]"
-              }
-            >
-              Home
-            </NavLink>
-            <NavLink
-              to="/shop"
-              className={({ isActive }) =>
-                isActive
-                  ? "text-black font-semibold"
-                  : "text-[rgba(0,0,0,0.5)]"
-              }
-            >
-              Shop
-            </NavLink>
-            <NavLink
-              to="/about"
-              className={({ isActive }) =>
-                isActive
-                  ? "text-black font-semibold"
-                  : "text-[rgba(0,0,0,0.5)]"
-              }
-            >
-              About us
-            </NavLink>
-          </nav>
+          {/* Right: Nav Links + Cart */}
+          <div className="flex items-center gap-8">
+            {/* Desktop Nav */}
+            <nav className="hidden md:flex items-center gap-10 text-[15px] font-medium">
+              <NavLink
+                to="/"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-black font-semibold"
+                    : "text-[rgba(0,0,0,0.5)]"
+                }
+              >
+                Home
+              </NavLink>
+              <NavLink
+                to="/shop"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-black font-semibold"
+                    : "text-[rgba(0,0,0,0.5)]"
+                }
+              >
+                Shop
+              </NavLink>
+              <NavLink
+                to="/about"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-black font-semibold"
+                    : "text-[rgba(0,0,0,0.5)]"
+                }
+              >
+                About us
+              </NavLink>
+            </nav>
 
-          {/* Right Side (Cart + Mobile Menu) */}
-          <div className="flex items-center gap-5">
             {/* Cart Button */}
             <button
               onClick={() => setIsCartOpen(true)}
               className="flex items-center gap-2 text-[15px] text-black hover:opacity-80 transition"
             >
-              <img
-                src={cartIcon}
-                alt="Cart"
-                className="w-5 h-5 object-contain"
-              />
+              <img src={cartIcon} alt="Cart" className="w-5 h-5 object-contain" />
               <span className="hidden sm:inline">Cart ($56)</span>
             </button>
 
@@ -92,46 +89,31 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* ===== Mobile Nav Menu ===== */}
+        {/* ===== Mobile Menu ===== */}
         <div
           className={`md:hidden bg-white border-t shadow-inner overflow-hidden transition-all duration-300 ${
             menuOpen ? "max-h-48 py-3" : "max-h-0"
           }`}
         >
           <nav className="flex flex-col items-center gap-3 text-[15px] font-medium">
-            <NavLink
-              to="/"
-              onClick={() => setMenuOpen(false)}
-              className={({ isActive }) =>
-                isActive
-                  ? "text-black font-semibold"
-                  : "text-[rgba(0,0,0,0.5)]"
-              }
-            >
-              Home
-            </NavLink>
-            <NavLink
-              to="/shop"
-              onClick={() => setMenuOpen(false)}
-              className={({ isActive }) =>
-                isActive
-                  ? "text-black font-semibold"
-                  : "text-[rgba(0,0,0,0.5)]"
-              }
-            >
-              Shop
-            </NavLink>
-            <NavLink
-              to="/about"
-              onClick={() => setMenuOpen(false)}
-              className={({ isActive }) =>
-                isActive
-                  ? "text-black font-semibold"
-                  : "text-[rgba(0,0,0,0.5)]"
-              }
-            >
-              About us
-            </NavLink>
+            {["/", "/shop", "/about"].map((path, i) => (
+              <NavLink
+                key={i}
+                to={path}
+                onClick={() => setMenuOpen(false)}
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-black font-semibold"
+                    : "text-[rgba(0,0,0,0.5)]"
+                }
+              >
+                {path === "/"
+                  ? "Home"
+                  : path === "/shop"
+                  ? "Shop"
+                  : "About us"}
+              </NavLink>
+            ))}
           </nav>
         </div>
       </header>
@@ -153,7 +135,6 @@ export default function Navbar() {
         }`}
       >
         <div className="bg-white shadow-2xl rounded-xl w-[400px] max-w-[90vw] p-6">
-          {/* Header */}
           <div className="flex items-center justify-between border-b pb-3">
             <h2 className="text-lg font-semibold">Your Cart</h2>
             <button
@@ -166,20 +147,18 @@ export default function Navbar() {
 
           {/* Cart Items */}
           <div className="mt-4 space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-medium">Red Rose Bouquet</p>
-                <p className="text-sm text-gray-500">Qty: 1</p>
+            {[
+              { name: "Red Rose Bouquet", qty: 1, price: 28 },
+              { name: "Sunflower Mix", qty: 1, price: 28 },
+            ].map((item, i) => (
+              <div key={i} className="flex justify-between items-center">
+                <div>
+                  <p className="font-medium">{item.name}</p>
+                  <p className="text-sm text-gray-500">Qty: {item.qty}</p>
+                </div>
+                <span className="font-semibold">${item.price}</span>
               </div>
-              <span className="font-semibold">$28</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-medium">Sunflower Mix</p>
-                <p className="text-sm text-gray-500">Qty: 1</p>
-              </div>
-              <span className="font-semibold">$28</span>
-            </div>
+            ))}
           </div>
 
           {/* Footer */}
