@@ -1,24 +1,43 @@
-import React from "react";
-import Button from "./Ui/Button"; // keep this path if Button.jsx is in components/Ui/
+import React, { useState } from "react";
+import Button from "./Ui/Button"; // keep if your Button is here
 
 export default function ProductCard({ item }) {
+  const [adding, setAdding] = useState(false);
+
   if (!item)
     return <div className="bg-gray-100 rounded-lg p-4 h-64 animate-pulse" />;
 
   const displayName = item.name || item.title || "Untitled";
   const priceNum = Number(item.price) || 0;
 
-  // POST to backend and notify Navbar to refresh cart
+  // Robust: support both _id and id
+  const addId = item?._id || item?.id;
+
   const handleAddToCart = async () => {
+    if (!addId) {
+      console.error("No valid item ID found on product:", item);
+      return;
+    }
     try {
+      setAdding(true);
       const res = await fetch(
-        `https://flower-mart-backend.onrender.com/cart/${item._id}`,
+        `https://flower-mart-backend.onrender.com/cart/${encodeURIComponent(addId)}`,
         { method: "POST" }
       );
-      if (!res.ok) throw new Error("Failed to add to cart");
-      window.dispatchEvent(new Event("cart:updated")); // let Navbar refresh
+
+      // Helpful debug in console if something goes wrong
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.error("Add to cart failed:", res.status, text);
+        throw new Error(`Failed to add to cart (HTTP ${res.status})`);
+      }
+
+      // Tell Navbar (and any listeners) to refresh cart
+      window.dispatchEvent(new Event("cart:updated"));
     } catch (err) {
       console.error("Error adding to cart:", err);
+    } finally {
+      setAdding(false);
     }
   };
 
@@ -43,9 +62,10 @@ export default function ProductCard({ item }) {
 
         <Button
           onClick={handleAddToCart}
-          className="mt-4 w-full bg-brand hover:bg-pink transition-transform transform hover:scale-105 rounded-none"
+          disabled={adding}
+          className="mt-4 w-full bg-brand hover:bg-pink transition-transform transform hover:scale-105 rounded-none disabled:opacity-60"
         >
-          ADD TO CART
+          {adding ? "ADDING..." : "ADD TO CART"}
         </Button>
       </div>
     </div>
