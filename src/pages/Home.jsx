@@ -22,13 +22,13 @@ export default function Home() {
       <img
         src={heroImage}
         alt="Workshop"
-        className="rounded-lg object-cover w-full"
+        className=" object-cover w-full"
       />
     </div>
 
     {/* Right Text */}
     <div className="lg:w-1/2 pl-6">
-      <h3 className="font-display text-[56px] leading-tight font-bold text-[#111827] mb-8">
+      <h3 className="font-display text-2xl lg:text-5xl leading-tight font-bold text-[#111827] mb-8">
         Flower & Plants Lover
       </h3>
       <div className="font-body text-[18px] text-gray-600 leading-relaxed space-y-5">
@@ -68,8 +68,8 @@ export default function Home() {
     {/* Heading */}
     <div className="text-center mb-6">
       <h3 className="text-4xl font-bold">
-        <span className="text-brand  text-[50px] font-display leading-tight font-bold">Latest</span>{" "}
-        <span className="text-[#111827] font-display text-[50px] leading-tight font-bold">Deals</span>
+        <span className="text-brand  text-2xl lg:text-5xl font-display leading-tight font-bold">Latest</span>{" "}
+        <span className="text-[#111827] font-display text-2xl lg:text-5xl leading-tight font-bold">Deals</span>
       </h3>
       <p className="text-gray-500 mt-2 max-w-xl mx-auto text-sm md:text-base">
         Indulge your senses with the beauty and fragrance of our fresh flower shop.

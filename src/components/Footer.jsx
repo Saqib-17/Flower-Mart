@@ -25,7 +25,7 @@ export default function Footer() {
 <div className="relative z-10 flex flex-col items-center justify-center px-4">
   {/* Title: fixed width to match design (586px) on md+ screens */}
   <h2
-    className="text-white font-display font-bold text-3xl md:text-5xl mb-6 text-center"
+    className="text-white font-display font-bold text-2xl md:text-5xl mb-6 text-center"
     style={{ width: "100%", maxWidth: "586px" }}
   >
     Join the colorful Bunch
