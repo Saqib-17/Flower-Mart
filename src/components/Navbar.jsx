@@ -1,61 +1,87 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link, NavLink } from "react-router-dom";
-import logo from "../assets/logo.png";
-import cartIcon from "../assets/cart.png";
+import Cart from "./Cart";
 
 export default function Navbar() {
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [navbarData, setNavbarData] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [cartItems, setCartItems] = useState([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Load navbar.json (logo, links, cart icon)
+  useEffect(() => {
+    fetch("/data/navbar.json")
+      .then((res) => res.json())
+      .then(setNavbarData)
+      .catch((err) => console.error("Error loading navbar data:", err));
+  }, []);
+
+  // Fetch cart items from backend
+  const fetchCart = useCallback(() => {
+    fetch("https://flower-mart-backend.onrender.com/cart")
+      .then((res) => res.json())
+      .then((data) => setCartItems(Array.isArray(data) ? data : []))
+      .catch((err) => console.error("Error loading cart:", err));
+  }, []);
+
+  useEffect(() => {
+    fetchCart();
+  }, [fetchCart]);
+
+  // 🔄 Keep navbar total in sync when any page updates the cart
+  useEffect(() => {
+    const onCartUpdated = () => fetchCart();
+    window.addEventListener("cart:updated", onCartUpdated);
+    return () => window.removeEventListener("cart:updated", onCartUpdated);
+  }, [fetchCart]);
+
+  // Remove item from cart
+  const handleRemoveFromCart = (id) => {
+    fetch(`https://flower-mart-backend.onrender.com/cart/${id}`, {
+      method: "DELETE",
+    })
+      .then(() =>
+        setCartItems((prev) => prev.filter((item) => item._id !== id))
+      )
+      .catch((err) => console.error("Error removing from cart:", err));
+  };
+
+  if (!navbarData) return null;
+
+  const cartTotal = cartItems.reduce(
+    (sum, item) => sum + (Number(item.price) || 0) * (item.qty || 1),
+    0
+  );
 
   return (
     <>
       {/* ===== Navbar ===== */}
       <header className="bg-white shadow-sm fixed top-0 left-0 w-full z-50">
         <div className="section-container flex items-center justify-between py-4">
-          
-          {/* Left: Logo */}
           <Link to="/" className="flex items-center">
             <img
-              src={logo}
-              alt="Faugel Logo"
+              src={navbarData.logo}
+              alt="Logo"
               className="h-12 w-auto object-contain"
             />
           </Link>
 
-          {/* Right: Nav Links + Cart */}
           <div className="flex items-center gap-8">
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-10 text-[15px] font-medium">
-              <NavLink
-                to="/"
-                className={({ isActive }) =>
-                  isActive
-                    ? "text-black font-semibold"
-                    : "text-[rgba(0,0,0,0.5)]"
-                }
-              >
-                Home
-              </NavLink>
-              <NavLink
-                to="/shop"
-                className={({ isActive }) =>
-                  isActive
-                    ? "text-black font-semibold"
-                    : "text-[rgba(0,0,0,0.5)]"
-                }
-              >
-                Shop
-              </NavLink>
-              <NavLink
-                to="/about"
-                className={({ isActive }) =>
-                  isActive
-                    ? "text-black font-semibold"
-                    : "text-[rgba(0,0,0,0.5)]"
-                }
-              >
-                About us
-              </NavLink>
+              {navbarData.navLinks.map((link, i) => (
+                <NavLink
+                  key={i}
+                  to={link.path}
+                  className={({ isActive }) =>
+                    isActive
+                      ? "text-black font-semibold"
+                      : "text-[rgba(0,0,0,0.5)]"
+                  }
+                >
+                  {link.name}
+                </NavLink>
+              ))}
             </nav>
 
             {/* Cart Button */}
@@ -63,8 +89,14 @@ export default function Navbar() {
               onClick={() => setIsCartOpen(true)}
               className="flex items-center gap-2 text-[15px] text-black hover:opacity-80 transition"
             >
-              <img src={cartIcon} alt="Cart" className="w-5 h-5 object-contain" />
-              <span className="hidden sm:inline">Cart ($56)</span>
+              <img
+                src={navbarData.cartIcon}
+                alt="Cart"
+                className="w-5 h-5 object-contain"
+              />
+              <span className="hidden sm:inline">
+                Cart (${cartTotal.toFixed(2)})
+              </span>
             </button>
 
             {/* Mobile Hamburger */}
@@ -96,10 +128,10 @@ export default function Navbar() {
           }`}
         >
           <nav className="flex flex-col items-center gap-3 text-[15px] font-medium">
-            {["/", "/shop", "/about"].map((path, i) => (
+            {navbarData.navLinks.map((link, i) => (
               <NavLink
                 key={i}
-                to={path}
+                to={link.path}
                 onClick={() => setMenuOpen(false)}
                 className={({ isActive }) =>
                   isActive
@@ -107,72 +139,24 @@ export default function Navbar() {
                     : "text-[rgba(0,0,0,0.5)]"
                 }
               >
-                {path === "/"
-                  ? "Home"
-                  : path === "/shop"
-                  ? "Shop"
-                  : "About us"}
+                {link.name}
               </NavLink>
             ))}
           </nav>
         </div>
       </header>
 
-      {/* ===== Overlay ===== */}
+      {/* ===== Cart Modal ===== */}
       {isCartOpen && (
-        <div
-          onClick={() => setIsCartOpen(false)}
-          className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40"
+        <Cart
+          cartItems={cartItems}
+          onClose={() => setIsCartOpen(false)}
+          removeFromCart={handleRemoveFromCart}
+          total={cartTotal}
+          isOpen={isCartOpen}
         />
       )}
-
-      {/* ===== Popup Cart Modal (Drops from Top) ===== */}
-      <div
-        className={`fixed left-1/2 top-0 transform -translate-x-1/2 transition-all duration-300 ease-out z-50 ${
-          isCartOpen
-            ? "opacity-100 translate-y-20"
-            : "opacity-0 -translate-y-full pointer-events-none"
-        }`}
-      >
-        <div className="bg-white shadow-2xl rounded-xl w-[400px] max-w-[90vw] p-6">
-          <div className="flex items-center justify-between border-b pb-3">
-            <h2 className="text-lg font-semibold">Your Cart</h2>
-            <button
-              onClick={() => setIsCartOpen(false)}
-              className="text-gray-500 hover:text-black text-2xl leading-none"
-            >
-              &times;
-            </button>
-          </div>
-
-          {/* Cart Items */}
-          <div className="mt-4 space-y-4">
-            {[
-              { name: "Red Rose Bouquet", qty: 1, price: 28 },
-              { name: "Sunflower Mix", qty: 1, price: 28 },
-            ].map((item, i) => (
-              <div key={i} className="flex justify-between items-center">
-                <div>
-                  <p className="font-medium">{item.name}</p>
-                  <p className="text-sm text-gray-500">Qty: {item.qty}</p>
-                </div>
-                <span className="font-semibold">${item.price}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Footer */}
-          <div className="border-t mt-4 pt-4">
-            <div className="flex items-center justify-between mb-3 font-semibold">
-              <span>Total:</span>
-              <span>$56</span>
-            </div>
-            <button className="w-full bg-brand hover:bg-brand-deep text-white py-2.5 rounded-md transition">
-              Checkout
-            </button>
-          </div>
-        </div>
-      </div>
+    
     </>
   );
 }
