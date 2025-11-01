@@ -1,17 +1,40 @@
 import React, { useState } from "react";
-import Button from "./Ui/Button"; // keep if your Button is here
+import Button from "./Ui/Button";
+
+const getImageUrl = (item) => {
+  // prefer imageURL from your API, but be flexible
+  let url =
+    item?.imageURL ||
+    item?.imageUrl ||
+    item?.image ||
+    item?.photo ||
+    item?.image_link ||
+    "";
+
+  // auto-fix the bad host from your dataset
+  if (url.includes("i.ibb.co.com")) {
+    url = url.replace("i.ibb.co.com", "i.ibb.co");
+  }
+
+  return url || null;
+};
 
 export default function ProductCard({ item }) {
   const [adding, setAdding] = useState(false);
+  const [imgErr, setImgErr] = useState(false);
 
   if (!item)
     return <div className="bg-gray-100 rounded-lg p-4 h-64 animate-pulse" />;
 
   const displayName = item.name || item.title || "Untitled";
   const priceNum = Number(item.price) || 0;
-
-  // Robust: support both _id and id
   const addId = item?._id || item?.id;
+
+  const fallback = `https://source.unsplash.com/600x600/?flowers,${encodeURIComponent(
+    displayName
+  )}`;
+
+  const imgSrc = imgErr ? fallback : getImageUrl(item) || fallback;
 
   const handleAddToCart = async () => {
     if (!addId) {
@@ -21,18 +44,16 @@ export default function ProductCard({ item }) {
     try {
       setAdding(true);
       const res = await fetch(
-        `https://flower-mart-backend.onrender.com/cart/${encodeURIComponent(addId)}`,
+        `https://flower-mart-backend.onrender.com/cart/${encodeURIComponent(
+          addId
+        )}`,
         { method: "POST" }
       );
-
-      // Helpful debug in console if something goes wrong
       if (!res.ok) {
         const text = await res.text().catch(() => "");
         console.error("Add to cart failed:", res.status, text);
         throw new Error(`Failed to add to cart (HTTP ${res.status})`);
       }
-
-      // Tell Navbar (and any listeners) to refresh cart
       window.dispatchEvent(new Event("cart:updated"));
     } catch (err) {
       console.error("Error adding to cart:", err);
@@ -42,17 +63,13 @@ export default function ProductCard({ item }) {
   };
 
   return (
-    <div className="bg-white rounded-md overflow-hidden shadow-sm flex flex-col items-center p-4">
+    <div className=" overflow-hidden shadow-sm flex flex-col items-center p-4">
       <img
-        src={
-          item.image
-            ? item.image
-            : `https://source.unsplash.com/300x300/?flowers,${encodeURIComponent(
-                displayName
-              )}`
-        }
+        src={imgSrc}
         alt={displayName}
         className="w-full h-60 object-cover"
+        onError={() => setImgErr(true)}
+        loading="lazy"
       />
 
       <div className="mt-4 text-center">
