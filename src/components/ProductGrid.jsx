@@ -4,6 +4,7 @@ import ProductCard from "./ProductCard";
 export default function ProductGrid() {
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
+  const [visibleCount, setVisibleCount] = useState(4);
 
   useEffect(() => {
     fetch("https://flower-mart-backend.onrender.com/items")
@@ -18,12 +19,15 @@ export default function ProductGrid() {
       });
   }, []);
 
-  if (error)
+  const handleViewMore = () => setVisibleCount((prev) => prev + 2);
+
+  if (error) {
     return (
       <div className="text-center text-red-500 mt-10">
         Failed to load products: {error}
       </div>
     );
+  }
 
   return (
     <section className="py-12">
@@ -42,17 +46,36 @@ export default function ProductGrid() {
           fresh.
         </p>
 
-        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-6">
+        {/* 2 / 3 / 4 columns; force equal row heights with inline style */}
+        <div
+          className="mt-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-stretch"
+          style={{ gridAutoRows: "1fr" }}
+        >
           {products.length > 0 ? (
-            products.map((item) => (
-              <ProductCard key={item._id} item={item} />
+            products.map((item, idx) => (
+              <div
+                key={item._id}
+                className={`${idx < visibleCount ? "block" : "hidden md:block"} h-full`}
+              >
+                <ProductCard item={item} />
+              </div>
             ))
           ) : (
-            <p className="text-center col-span-full text-gray-500">
-              No products found.
-            </p>
+            <p className="text-center col-span-full text-gray-500">No products found.</p>
           )}
         </div>
+
+        {products.length > visibleCount && (
+          <div className="mt-8 flex justify-center md:hidden">
+            <button
+              onClick={handleViewMore}
+              className="px-6 py-2 bg-brand text-white rounded-none hover:bg-pink transition-transform transform hover:scale-105"
+              aria-label="View more products"
+            >
+              View more
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );
