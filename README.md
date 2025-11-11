@@ -1,7 +1,7 @@
 # 🌸 Flower Mart
 
 **Live Site:** [https://flower-mart.netlify.app/](https://flower-mart.netlify.app/)
-**GitHub Repo:** [https://github.com/faisalahmed3/flower-mart.git](https://github.com/faisalahmed3/flower-mart.git)
+**GitHub Repo:** [https://github.com/Saqib-17/Flower-Mart.git](https://github.com/Saqib-17/Flower-Mart)
 
 ---
 
